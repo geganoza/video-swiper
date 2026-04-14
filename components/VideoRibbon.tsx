@@ -39,10 +39,17 @@ export function VideoRibbon({ slides }: Props) {
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return;
+      // Force muted + playsInline in JS (Safari needs this set as property, not
+      // just attribute, for autoplay to work reliably).
+      video.muted = true;
+      video.defaultMuted = true;
       if (i === index) {
-        video.muted = true;
         video.currentTime = 0;
-        video.play().catch(() => {});
+        const tryPlay = () => video.play().catch(() => {});
+        tryPlay();
+        if (video.readyState < 2) {
+          video.addEventListener("canplay", tryPlay, { once: true });
+        }
       } else {
         video.pause();
       }
@@ -161,6 +168,7 @@ export function VideoRibbon({ slides }: Props) {
                   }}
                   data-index={i}
                   src={`${slide.videoUrl}#t=0.1`}
+                  autoPlay
                   muted
                   playsInline
                   preload="auto"

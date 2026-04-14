@@ -199,6 +199,14 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+}
+.ribbon__media video::-webkit-media-controls,
+.ribbon__media video::-webkit-media-controls-panel,
+.ribbon__media video::-webkit-media-controls-start-playback-button,
+.ribbon__media video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none;
 }
 
 .ribbon__meta {
