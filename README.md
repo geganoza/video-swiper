@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Video Ribbon Slider
 
-## Getting Started
+Horizontal video carousel inspired by [arup.com](https://www.arup.com). One large active card plays a video; smaller neighbors peek on the left and right. When the active video ends, the next one takes over automatically.
 
-First, run the development server:
+## Run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key files
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | What it does |
+|------|--------------|
+| `components/VideoRibbon.tsx` | The slider component (Swiper + auto-advance logic) |
+| `app/globals.css` | Layout, slide widths, animation timings |
+| `lib/slides.ts` | Slide data (title, subtitle, video URL) |
+| `public/videos/` | Placeholder videos — replace with your own |
 
-## Learn More
+## How it works
 
-To learn more about Next.js, take a look at the following resources:
+- **[Swiper.js](https://swiperjs.com)** handles the horizontal carousel, with `slidesPerView="auto"` + `centeredSlides`
+- **CSS** controls slide widths: active slide is wide (`--slide-active-w`), neighbors are narrow (`--slide-idle-w`)
+- **React refs** keep track of each `<video>` element
+- On slide change, the active video plays from 0 and neighbors pause
+- On `video.onended`, we call `swiper.slideTo(next)` to auto-advance
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Customization
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Change videos** — edit `lib/slides.ts`, put your files in `public/videos/`.
 
-## Deploy on Vercel
+**Change sizes** — edit the CSS variables at the top of `app/globals.css`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```css
+:root {
+  --slide-active-w: min(70vw, 1016px);
+  --slide-idle-w: min(25vw, 366px);
+  --slide-active-h: clamp(320px, 36vw, 572px);
+  --slide-idle-h: clamp(220px, 20vw, 326px);
+  --slide-duration: 700ms;
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Change animation** — `--slide-duration` (CSS) + `speed={700}` on the Swiper (TSX).
