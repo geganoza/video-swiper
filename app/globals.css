@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
+@property --progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --muted: #6b6b6b;
   --border: #e5e5e5;
-  --slide-active-w: 1008px;
+  /* Idle card = square (size == slide-idle-w). Active = landscape. */
   --slide-idle-w: 360px;
+  --slide-active-w: 1008px;
   --slide-active-h: 572px;
-  --slide-idle-h: 326px;
 }
 
 @theme inline {
@@ -135,36 +147,51 @@ body {
 
 .ribbon__card {
   flex-shrink: 0;
-  width: var(--slide-idle-w);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  will-change: width;
+  --progress: 0;
+  --scale: 1;
+  width: calc(
+    var(--slide-idle-w) * var(--scale)
+    + (var(--slide-active-h) - var(--slide-idle-w) * var(--scale))
+      * min(var(--progress) * 2, 1)
+    + (var(--slide-active-w) - var(--slide-active-h))
+      * max(var(--progress) * 2 - 1, 0)
+  );
+  transition:
+    --progress 2000ms cubic-bezier(0.22, 1, 0.36, 1),
+    --scale 2000ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Active slide (offset 0) — big */
+/* Two custom properties drive both width & height via calc:
+ *   --progress 0 → 0.5 : square grows from idle to big square (height == width)
+ *   --progress 0.5 → 1 : width continues to widen; height stays at active height
+ * --scale controls the idle size (1.0 default, 1.3 for the far-right slot).
+ */
+
 .ribbon__card[data-offset="0"] {
-  width: var(--slide-active-w);
+  --progress: 1;
 }
 
-/* Far-right teaser (offset 2) — 30% bigger than idle */
 .ribbon__card[data-offset="2"] {
-  width: calc(var(--slide-idle-w) * 1.3);
+  --scale: 1.3;
 }
 
 .ribbon__media {
   width: 100%;
-  height: var(--slide-idle-h);
+  height: calc(
+    var(--slide-idle-w) * var(--scale)
+    + (var(--slide-active-h) - var(--slide-idle-w) * var(--scale))
+      * min(var(--progress) * 2, 1)
+  );
   overflow: hidden;
   border-radius: 12px;
   background: #111;
-  transition: height 2000ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.ribbon__card[data-offset="0"] .ribbon__media {
-  height: var(--slide-active-h);
-}
-.ribbon__card[data-offset="2"] .ribbon__media {
-  height: calc(var(--slide-idle-h) * 1.3);
+
+.ribbon__meta {
+  overflow: hidden;
 }
 
 .ribbon__media video {

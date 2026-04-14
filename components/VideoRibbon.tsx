@@ -146,11 +146,13 @@ export function VideoRibbon({ slides }: Props) {
               key={slide._key}
               className="ribbon__card"
               data-offset={i - index}
-              style={{
-                transition: jumping
-                  ? "none"
-                  : `width ${DURATION}ms cubic-bezier(0.22, 1, 0.36, 1), height ${DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`,
-              }}
+              style={
+                jumping
+                  ? {
+                      transition: "none",
+                    }
+                  : undefined
+              }
             >
               <div className="ribbon__media">
                 <video
