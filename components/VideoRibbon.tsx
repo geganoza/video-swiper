@@ -166,6 +166,7 @@ export function VideoRibbon({ slides }: Props) {
                   }}
                   data-index={i}
                   src={slide.videoUrl}
+                  autoPlay={i === index}
                   muted
                   playsInline
                   preload="auto"
