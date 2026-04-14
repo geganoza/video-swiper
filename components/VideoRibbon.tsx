@@ -35,25 +35,23 @@ export function VideoRibbon({ slides }: Props) {
 
   const displayIndex = ((index % count) + count) % count;
 
-  // Play active, pause others
+  // Play active, pause every other. Pause happens FIRST to override any
+  // speculative autoplay the browser might have started for preloaded videos.
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return;
-      // Force muted + playsInline in JS (Safari needs this set as property, not
-      // just attribute, for autoplay to work reliably).
       video.muted = true;
       video.defaultMuted = true;
-      if (i === index) {
-        video.currentTime = 0;
-        const tryPlay = () => video.play().catch(() => {});
-        tryPlay();
-        if (video.readyState < 2) {
-          video.addEventListener("canplay", tryPlay, { once: true });
-        }
-      } else {
-        video.pause();
-      }
+      if (i !== index) video.pause();
     });
+    const active = videoRefs.current[index];
+    if (!active) return;
+    active.currentTime = 0;
+    const tryPlay = () => active.play().catch(() => {});
+    tryPlay();
+    if (active.readyState < 2) {
+      active.addEventListener("canplay", tryPlay, { once: true });
+    }
   }, [index]);
 
   // When we get close to an edge, silently re-anchor to the equivalent middle
@@ -167,11 +165,12 @@ export function VideoRibbon({ slides }: Props) {
                     videoRefs.current[i] = el;
                   }}
                   data-index={i}
-                  src={`${slide.videoUrl}#t=0.1`}
-                  autoPlay
+                  src={slide.videoUrl}
                   muted
                   playsInline
                   preload="auto"
+                  controls={false}
+                  disablePictureInPicture
                   onEnded={handleVideoEnded}
                 />
               </div>
